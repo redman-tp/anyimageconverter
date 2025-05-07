@@ -25,26 +25,36 @@ const storage = multer.diskStorage({
     if (!fs.existsSync(uploadDir)) {
       fs.mkdirSync(uploadDir, { recursive: true });
     }
+    console.log(`Setting destination for file: ${file.originalname} to ${uploadDir}`);
     cb(null, uploadDir);
   },
   filename: (req, file, cb) => {
-    cb(null, `${Date.now()}-${file.originalname}`);
+    const uniqueName = `${Date.now()}-${file.originalname}`;
+    console.log(`Setting filename for upload: ${uniqueName}`);
+    cb(null, uniqueName);
   }
 });
 
+const fileFilter = (req, file, cb) => {
+  // Accept image files - allow additional formats
+  const filetypes = /jpeg|jpg|png|tiff|webp|gif|bmp/;
+  const mimetype = filetypes.test(file.mimetype);
+  const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+  
+  console.log(`Filtering file: ${file.originalname}, mimetype: ${file.mimetype}, valid: ${mimetype && extname}`);
+  
+  if (mimetype && extname) {
+    return cb(null, true);
+  }
+  
+  cb(new Error(`Only image files are allowed. Received: ${file.mimetype}`));
+};
+
 const upload = multer({ 
   storage: storage,
-  fileFilter: (req, file, cb) => {
-    // Accept only image files
-    const filetypes = /jpeg|jpg|png|tiff/;
-    const mimetype = filetypes.test(file.mimetype);
-    const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
-    
-    if (mimetype && extname) {
-      return cb(null, true);
-    }
-    
-    cb(new Error('Only image files are allowed!'));
+  fileFilter: fileFilter,
+  limits: {
+    fileSize: 100 * 1024 * 1024 // 100MB limit
   }
 });
 
@@ -57,100 +67,131 @@ app.get('/', (req, res) => {
 });
 
 // Handle file upload and conversion
-app.post('/convert', upload.array('images', 50), async (req, res) => {
-  try {
-    const files = req.files;
-    const quality = parseInt(req.body.quality) || 75;
-    const moveOriginals = req.body.moveOriginals === 'true';
-    const skipExisting = req.body.skipExisting === 'true';
-    
-    if (!files || files.length === 0) {
-      return res.status(400).json({ success: false, message: 'No files uploaded' });
+app.post('/convert', (req, res) => {
+  console.log('Received request to /convert endpoint');
+  console.log('Content-Type:', req.headers['content-type']);
+  
+  // Use single field name 'file' to match client
+  upload.array('file')(req, res, async (err) => {
+    if (err) {
+      console.error('Multer error:', err);
+      return res.status(400).json({ 
+        success: false, 
+        message: err.message || 'Error uploading files',
+        code: err.code
+      });
     }
     
-    const results = {
-      converted: 0,
-      skipped: 0,
-      failed: 0,
-      files: [],
-      totalOriginalSize: 0,
-      totalWebpSize: 0
-    };
-    
-    const outputDir = path.join(__dirname, 'outputs');
-    if (!fs.existsSync(outputDir)) {
-      fs.mkdirSync(outputDir, { recursive: true });
-    }
-    
-    const tempDir = path.join(__dirname, 'temp');
-    if (moveOriginals && !fs.existsSync(tempDir)) {
-      fs.mkdirSync(tempDir, { recursive: true });
-    }
-    
-    // Process each file
-    for (const file of files) {
-      const fileName = path.basename(file.originalname, path.extname(file.originalname));
-      const webpPath = path.join(outputDir, `${fileName}.webp`);
+    try {
+      console.log('Files received:', req.files?.length || 0);
       
-      // Check if WebP version already exists
-      if (skipExisting && fs.existsSync(webpPath)) {
-        results.skipped++;
-        results.files.push({
-          originalName: file.originalname,
-          status: 'skipped',
-          message: 'WebP version already exists'
-        });
-        continue;
+      const files = req.files;
+      const quality = parseInt(req.body.quality) || 75;
+      const moveOriginals = req.body.moveOriginals === 'true';
+      const skipExisting = req.body.skipExisting === 'true';
+      
+      console.log('Settings:', { quality, moveOriginals, skipExisting });
+      
+      if (!files || files.length === 0) {
+        return res.status(400).json({ success: false, message: 'No files uploaded' });
       }
       
-      try {
-        // Get original file size
-        const originalStats = fs.statSync(file.path);
-        results.totalOriginalSize += originalStats.size;
+      const results = {
+        converted: 0,
+        skipped: 0,
+        failed: 0,
+        files: [],
+        totalOriginalSize: 0,
+        totalWebpSize: 0
+      };
+      
+      const outputDir = path.join(__dirname, 'outputs');
+      if (!fs.existsSync(outputDir)) {
+        fs.mkdirSync(outputDir, { recursive: true });
+      }
+      
+      const tempDir = path.join(__dirname, 'temp');
+      if (moveOriginals && !fs.existsSync(tempDir)) {
+        fs.mkdirSync(tempDir, { recursive: true });
+      }
+      
+      // Process each file
+      for (const file of files) {
+        console.log('Processing file:', file.originalname);
         
-        // Convert to WebP
-        await sharp(file.path)
-          .webp({ quality: quality })
-          .toFile(webpPath);
+        const fileName = path.basename(file.originalname, path.extname(file.originalname));
+        const webpPath = path.join(outputDir, `${fileName}.webp`);
         
-        // Get WebP file size
-        const webpStats = fs.statSync(webpPath);
-        results.totalWebpSize += webpStats.size;
-        
-        // Move original file if requested
-        if (moveOriginals) {
-          const tempPath = path.join(tempDir, file.originalname);
-          fs.renameSync(file.path, tempPath);
+        // Check if WebP version already exists
+        if (skipExisting && fs.existsSync(webpPath)) {
+          console.log('Skipping existing file:', fileName);
+          results.skipped++;
+          results.files.push({
+            originalName: file.originalname,
+            status: 'skipped',
+            message: 'WebP version already exists'
+          });
+          continue;
         }
         
-        results.converted++;
-        results.files.push({
-          originalName: file.originalname,
-          webpName: `${fileName}.webp`,
-          originalSize: originalStats.size,
-          webpSize: webpStats.size,
-          status: 'converted',
-          message: 'Successfully converted to WebP'
-        });
-      } catch (err) {
-        results.failed++;
-        results.files.push({
-          originalName: file.originalname,
-          status: 'failed',
-          message: err.message
-        });
+        try {
+          // Get original file size
+          const originalStats = fs.statSync(file.path);
+          results.totalOriginalSize += originalStats.size;
+          
+          // Convert to WebP
+          console.log('Converting to WebP:', fileName);
+          await sharp(file.path)
+            .webp({ quality: quality })
+            .toFile(webpPath);
+          
+          // Get WebP file size
+          const webpStats = fs.statSync(webpPath);
+          results.totalWebpSize += webpStats.size;
+          
+          // Move original file if requested
+          if (moveOriginals) {
+            console.log('Moving original file to temp folder');
+            const tempPath = path.join(tempDir, file.originalname);
+            fs.renameSync(file.path, tempPath);
+          }
+          
+          results.converted++;
+          results.files.push({
+            originalName: file.originalname,
+            webpName: `${fileName}.webp`,
+            originalSize: originalStats.size,
+            webpSize: webpStats.size,
+            status: 'converted',
+            message: 'Successfully converted to WebP'
+          });
+        } catch (err) {
+          console.error('Error processing file:', err);
+          results.failed++;
+          results.files.push({
+            originalName: file.originalname,
+            status: 'failed',
+            message: err.message
+          });
+        }
       }
+      
+      console.log('Conversion results:', {
+        converted: results.converted,
+        skipped: results.skipped,
+        failed: results.failed
+      });
+      
+      res.json({
+        success: true,
+        results: results,
+        spaceSaved: results.totalOriginalSize - results.totalWebpSize
+      });
+    } catch (error) {
+      console.error('Error processing files:', error);
+      res.status(500).json({ success: false, message: error.message });
     }
-    
-    res.json({
-      success: true,
-      results: results,
-      spaceSaved: results.totalOriginalSize - results.totalWebpSize
-    });
-  } catch (error) {
-    console.error('Error processing files:', error);
-    res.status(500).json({ success: false, message: error.message });
-  }
+  });
 });
 
 // Download converted images

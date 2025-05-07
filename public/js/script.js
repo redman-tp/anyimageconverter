@@ -96,17 +96,24 @@ document.addEventListener('DOMContentLoaded', () => {
   // Check if file is an image
   function isImageFile(file) {
     const acceptedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/tiff'];
-    return acceptedTypes.includes(file.type);
+    const isAccepted = acceptedTypes.includes(file.type);
+    console.log(`File ${file.name} is ${isAccepted ? 'an accepted' : 'not an accepted'} image type: ${file.type}`);
+    return isAccepted;
   }
   
   // Add files to the list
   function addFilesToList(files) {
+    console.log(`Attempting to add ${files.length} files to the list`);
+    
     if (!files.length) return;
     
     // Add files to the array
     for (const file of files) {
       if (!selectedFiles.some(f => f.name === file.name && f.size === file.size)) {
         selectedFiles.push(file);
+        console.log(`Added file: ${file.name} (${file.type})`);
+      } else {
+        console.log(`Skipped duplicate file: ${file.name}`);
       }
     }
     
@@ -177,13 +184,27 @@ document.addEventListener('DOMContentLoaded', () => {
     if (selectedFiles.length === 0) return;
     
     const formData = new FormData();
-    selectedFiles.forEach(file => {
-      formData.append('images', file);
+    
+    // Dump formData contents for debugging
+    console.log('Creating FormData for', selectedFiles.length, 'files');
+    
+    // Append each file individually
+    selectedFiles.forEach((file, index) => {
+      // Use a consistent field name for each file
+      formData.append(`file`, file);
+      console.log(`Appended file[${index}]:`, file.name, file.type, file.size);
     });
     
+    // Add form settings
     formData.append('quality', qualitySlider.value);
     formData.append('moveOriginals', organizeOriginals.checked);
     formData.append('skipExisting', skipExisting.checked);
+    
+    console.log('FormData created with settings:', {
+      quality: qualitySlider.value,
+      moveOriginals: organizeOriginals.checked,
+      skipExisting: skipExisting.checked
+    });
     
     // Show progress
     progressSection.style.display = 'block';
@@ -207,16 +228,22 @@ document.addEventListener('DOMContentLoaded', () => {
     }, selectedFiles.length * 10);
     
     // Make API request
+    console.log('Sending request to /convert endpoint');
     fetch('/convert', {
       method: 'POST',
       body: formData
     })
-    .then(response => response.json())
+    .then(response => {
+      console.log('Response status:', response.status);
+      return response.json();
+    })
     .then(data => {
       clearInterval(progressInterval);
       progressBar.style.width = '100%';
       progressPercentage.textContent = '100%';
       progressCount.textContent = `${selectedFiles.length}/${selectedFiles.length}`;
+      
+      console.log('Response data:', data);
       
       if (data.success) {
         showResults(data.results, data.spaceSaved);

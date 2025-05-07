@@ -25,15 +25,13 @@
                     </div>
                     <h3>Drop images or folders here</h3>
                     <p>or</p>
-                    <form id="upload-form" enctype="multipart/form-data">
-                        <div class="button-group">
-                            <label for="file-input" class="btn primary">Select Images</label>
-                            <input type="file" id="file-input" name="images" multiple accept=".jpg,.jpeg,.png,.tiff" style="display: none;">
-                            
-                            <label for="folder-input" class="btn secondary">Select Folder</label>
-                            <input type="file" id="folder-input" name="images" webkitdirectory directory multiple style="display: none;">
-                        </div>
-                    </form>
+                    <div class="button-group">
+                        <label for="file-input" class="btn primary">Select Images</label>
+                        <input type="file" id="file-input" multiple accept=".jpg,.jpeg,.png,.tiff" style="display: none;">
+                        
+                        <label for="folder-input" class="btn secondary">Select Folder</label>
+                        <input type="file" id="folder-input" webkitdirectory directory multiple style="display: none;">
+                    </div>
                 </div>
             </div>
 

@@ -4,7 +4,8 @@ npm-debug.log
 yarn-debug.log
 yarn-error.log
 
-# Temp folders for original images
+# Image folders
+assets/
 Temp*/
 
 # Editor directories and files

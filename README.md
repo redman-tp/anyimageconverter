@@ -18,8 +18,8 @@ This tool recursively scans folders for images and converts them to the more eff
 
 1. Clone this repository:
    ```
-   git clone https://github.com/yourusername/webp-image-converter.git
-   cd webp-image-converter
+   git clone https://github.com/redman-tp/anyimageconverter.git
+   cd anyimageconverter
    ```
 
 2. Install dependencies:
@@ -36,7 +36,7 @@ This tool recursively scans folders for images and converts them to the more eff
 3. The script will process all images recursively through subfolders
 
 ```
-webp-image-converter/
+anyimageconverter/
 ├── assets/              # Create this folder for your images
 │   ├── images/          # You can organize in subfolders 
 │   │   ├── photo1.jpg   # Source images to convert

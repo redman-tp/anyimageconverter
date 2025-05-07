@@ -206,6 +206,9 @@ document.addEventListener('DOMContentLoaded', () => {
       skipExisting: skipExisting.checked
     });
     
+    // Update the status of files in the table to "Processing"
+    updateFileStatusInTable('all', 'processing', 'Processing...');
+    
     // Show progress
     progressSection.style.display = 'block';
     progressBar.style.width = '0%';
@@ -215,17 +218,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // Hide results
     hideResults();
     
-    // Simulate progress (in real app, this would update based on actual conversion progress)
-    let progress = 0;
-    const progressInterval = setInterval(() => {
-      progress += 1;
-      if (progress <= 100) {
-        progressBar.style.width = `${progress}%`;
-        progressPercentage.textContent = `${progress}%`;
-      } else {
-        clearInterval(progressInterval);
-      }
-    }, selectedFiles.length * 10);
+    // Track processed files
+    let processedFiles = 0;
     
     // Make API request
     console.log('Sending request to /convert endpoint');
@@ -238,26 +232,87 @@ document.addEventListener('DOMContentLoaded', () => {
       return response.json();
     })
     .then(data => {
-      clearInterval(progressInterval);
-      progressBar.style.width = '100%';
-      progressPercentage.textContent = '100%';
-      progressCount.textContent = `${selectedFiles.length}/${selectedFiles.length}`;
-      
       console.log('Response data:', data);
       
       if (data.success) {
+        // Update progress to 100%
+        progressBar.style.width = '100%';
+        progressPercentage.textContent = '100%';
+        progressCount.textContent = `${selectedFiles.length}/${selectedFiles.length}`;
+        
+        // Update file statuses in the table
+        data.results.files.forEach(fileResult => {
+          const index = selectedFiles.findIndex(file => file.name === fileResult.originalName);
+          if (index !== -1) {
+            updateFileStatusInTable(index, fileResult.status, fileResult.message);
+          }
+        });
+        
+        // Show results
         showResults(data.results, data.spaceSaved);
         convertedFiles = data.results.files.filter(file => file.status === 'converted');
         populateConvertedFilesList();
       } else {
         alert('Error: ' + data.message);
+        updateFileStatusInTable('all', 'failed', data.message);
       }
     })
     .catch(error => {
-      clearInterval(progressInterval);
       console.error('Error:', error);
       alert('An error occurred during conversion. Please try again.');
+      updateFileStatusInTable('all', 'failed', 'Connection error');
+      
+      // Update progress to show failure
+      progressBar.style.width = '100%';
+      progressBar.style.backgroundColor = 'var(--error-color)';
+      progressPercentage.textContent = 'Failed';
+      progressCount.textContent = `0/${selectedFiles.length}`;
     });
+  }
+  
+  // Update the status of a file in the table
+  function updateFileStatusInTable(index, status, message) {
+    const rows = filesList.querySelectorAll('tr');
+    
+    if (index === 'all') {
+      // Update all rows
+      rows.forEach(row => {
+        const statusCell = row.querySelector('td:nth-child(4)');
+        if (statusCell) {
+          updateStatusBadge(statusCell, status, message);
+        }
+      });
+    } else if (rows[index]) {
+      // Update specific row
+      const statusCell = rows[index].querySelector('td:nth-child(4)');
+      if (statusCell) {
+        updateStatusBadge(statusCell, status, message);
+      }
+    }
+  }
+  
+  // Update a status badge element
+  function updateStatusBadge(cell, status, message) {
+    let badge = cell.querySelector('.status-badge');
+    if (!badge) {
+      badge = document.createElement('span');
+      badge.className = 'status-badge';
+      cell.appendChild(badge);
+    }
+    
+    // Remove all status classes
+    badge.classList.remove('pending', 'processing', 'converted', 'skipped', 'failed');
+    
+    // Add appropriate class
+    badge.classList.add(status);
+    
+    // Update text
+    badge.textContent = status.charAt(0).toUpperCase() + status.slice(1);
+    
+    // Add title with more details
+    if (message) {
+      badge.title = message;
+    }
   }
   
   // Show results

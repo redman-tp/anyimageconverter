@@ -6,6 +6,9 @@ yarn-error.log
 
 # Image folders
 assets/
+uploads/
+outputs/
+temp/
 Temp*/
 
 # Editor directories and files

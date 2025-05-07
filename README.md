@@ -1,94 +1,122 @@
 # WebP Image Converter
 
-A Node.js utility that automatically converts image files to WebP format and organizes the originals in a structured way.
+A Node.js application that converts image files to WebP format with both a web interface and command-line functionality.
 
 ## Overview
 
-This tool recursively scans folders for images and converts them to the more efficient WebP format. It preserves your original files by moving them to separate temp folders, making it safe and organized.
+This tool helps you convert your images to the WebP format, which offers superior compression and quality characteristics compared to traditional formats like JPEG and PNG. Whether you prefer a user-friendly web interface or a powerful command-line tool, this application has you covered.
 
 ## Features
 
-- **Automatic scanning**: Recursively finds all images in a directory and its subdirectories
-- **Smart conversion**: Converts JPG, JPEG, PNG, and TIFF files to WebP format with customizable quality
+- **Web Interface**: Easy-to-use drag-and-drop interface for converting individual files or folders
+- **Command-Line Tool**: Batch process entire directories recursively
+- **Smart Conversion**: Converts JPG, JPEG, PNG, and TIFF files to WebP format with customizable quality
 - **Organization**: Automatically moves original files to temp folders after conversion
-- **Skip existing**: Avoids duplicate work by skipping images that already have WebP versions
-- **Console feedback**: Detailed logging of all operations
+- **Skip Existing**: Avoids duplicate work by skipping images that already have WebP versions
+- **Visual Feedback**: Detailed logging of all operations with conversion statistics
 
 ## Installation
 
 1. Clone this repository:
-   ```
+   ```bash
    git clone https://github.com/redman-tp/anyimageconverter.git
    cd anyimageconverter
    ```
 
 2. Install dependencies:
-   ```
+   ```bash
    npm install
    ```
 
 ## Usage
 
-### Folder Structure Setup
+### Web Interface
 
-1. Create an `assets` folder in the project root if it doesn't exist
-2. Place your images or image folders inside the `assets` directory
-3. The script will process all images recursively through subfolders
-
-```
-anyimageconverter/
-├── assets/              # Create this folder for your images
-│   ├── images/          # You can organize in subfolders 
-│   │   ├── photo1.jpg   # Source images to convert
-│   │   └── photo2.png   
-│   └── more-images/     
-└── index.js             # The conversion script
-```
-
-### Running the Converter
-
-1. Edit the `index.js` file to customize settings if needed:
-   ```javascript
-   // Line 5: Change the image folder path if necessary
-   const imageFolder = path.resolve(__dirname, 'assets');
-   
-   // Line 8: Add or remove supported image extensions
-   const imageExtensions = ['.jpg', '.jpeg', '.png', '.tiff'];
-   
-   // Line 42: Modify the WebP quality (1-100)
-   .webp({ quality: 75 })
-   ```
-
-2. Run the script:
-   ```
+1. Start the web server:
+   ```bash
    npm start
    ```
 
-3. The script will:
-   - Convert all found images to WebP format
-   - Move originals to temp folders (e.g., `Tempassets/`, `Tempimages/`)
-   - Skip any images that already have WebP versions
+2. Open your browser and navigate to http://localhost:3000
 
-### Example Output
+3. Use the web interface to:
+   - Drag and drop images or folders
+   - Select images with the file picker
+   - Adjust WebP quality
+   - Configure conversion options
+   - Download converted images
 
-```
-Starting image conversion in: C:/path/to/assets
-Converted: C:/path/to/assets/photo1.jpg -> C:/path/to/assets/photo1.webp
-Created new temp folder: C:/path/to/Tempassets
-Moved original: C:/path/to/assets/photo1.jpg -> C:/path/to/Tempassets/photo1.jpg
-Skipped: C:/path/to/assets/photo2.jpg - WebP version already exists
-Image conversion process completed.
+### Command-Line
+
+For batch processing directories, you can use the included command-line script:
+
+1. Edit the `index.js` file to set your source directory:
+   ```javascript
+   const imageFolder = 'path/to/your/images';
+   ```
+
+2. Run the script:
+   ```bash
+   node index.js
+   ```
+
+## Configuration
+
+### Web Interface Options
+
+- **WebP Quality**: Adjust the quality/compression ratio (1-100)
+- **Move Originals**: Choose whether to move original files to a temp folder
+- **Skip Existing**: Skip conversion if WebP version already exists
+
+### Command-Line Options
+
+Edit these variables in `index.js`:
+
+```javascript
+const imageFolder = 'path/to/your/images'; // Directory to scan
+const quality = 75; // WebP quality (1-100)
 ```
 
 ## How It Works
 
-1. The script uses the Sharp library to efficiently convert images
-2. For each image file with a supported extension:
-   - It checks if a WebP version already exists (to avoid duplicating work)
-   - It converts the image to WebP format with 75% quality (configurable)
-   - It creates a "Temp" folder at the same level as the image's folder
-   - It moves the original file to this temp folder
-3. The script skips all temp folders during its scan to avoid processing the same images twice
+### Web Interface
+
+1. The application uses Express.js and EJS templates to provide a responsive web interface
+2. Users can upload images through drag-and-drop or file selection
+3. Images are processed server-side using the Sharp library
+4. Converted images are available for download individually or as a batch
+
+### Command-Line Tool
+
+1. The script recursively scans the specified folder hierarchy
+2. For each image file (JPG, JPEG, PNG, TIFF):
+   - Converts it to WebP format using the specified quality
+   - Saves the new file alongside the original
+   - Moves the original to a Temp folder
+
+## Development
+
+To run the application in development mode with automatic reloading:
+
+```bash
+npm run dev
+```
+
+## Dependencies
+
+- **express**: Web server framework
+- **ejs**: Templating engine
+- **multer**: File upload handling
+- **sharp**: Image processing library
+- **body-parser**: Request body parsing
+
+## License
+
+ISC
+
+## Author
+
+Redman (Wordsworth)
 
 ## Customization
 
@@ -117,10 +145,6 @@ const tempFolderName = `Temp${dirName}`; // Change to your preferred format
 
 - Node.js 14.0 or higher
 - Sharp library (automatically installed with npm install)
-
-## License
-
-MIT
 
 ## Contributing
 

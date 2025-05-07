@@ -1,0 +1,356 @@
+/* Base styles */
+:root {
+  --primary-color: #4285f4;
+  --primary-hover: #3367d6;
+  --secondary-color: #757575;
+  --secondary-hover: #5f5f5f;
+  --dark-text: #212121;
+  --light-text: #757575;
+  --border-color: #e0e0e0;
+  --bg-color: #f5f5f5;
+  --card-bg: #ffffff;
+  --success-color: #34a853;
+  --warning-color: #fbbc05;
+  --error-color: #ea4335;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  line-height: 1.6;
+  color: var(--dark-text);
+  background-color: var(--bg-color);
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+/* Typography */
+h1 {
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+  color: var(--primary-color);
+}
+
+h2 {
+  font-size: 1.8rem;
+  margin: 1.5rem 0 1rem;
+  color: var(--secondary-color);
+}
+
+h3 {
+  font-size: 1.3rem;
+  margin-bottom: 0.5rem;
+}
+
+.subtitle {
+  font-size: 1.2rem;
+  color: var(--light-text);
+  margin-bottom: 2rem;
+}
+
+/* Header and Footer */
+header, footer {
+  text-align: center;
+  padding: 1rem 0;
+}
+
+footer {
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--border-color);
+  color: var(--light-text);
+}
+
+/* Upload Area */
+.upload-section {
+  margin-bottom: 2rem;
+}
+
+.upload-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 2px dashed var(--border-color);
+  border-radius: 8px;
+  padding: 2rem;
+  background-color: var(--card-bg);
+  transition: border-color 0.3s, background-color 0.3s;
+  cursor: pointer;
+}
+
+.upload-box:hover, .upload-box.drag-over {
+  border-color: var(--primary-color);
+  background-color: rgba(66, 133, 244, 0.05);
+}
+
+.upload-icon {
+  color: var(--primary-color);
+  margin-bottom: 1rem;
+}
+
+/* Buttons */
+.button-group {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.btn {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  text-align: center;
+  transition: background-color 0.3s, color 0.3s;
+  border: none;
+  font-size: 1rem;
+}
+
+.btn.primary {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.btn.primary:hover {
+  background-color: var(--primary-hover);
+}
+
+.btn.secondary {
+  background-color: var(--secondary-color);
+  color: white;
+}
+
+.btn.secondary:hover {
+  background-color: var(--secondary-hover);
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.action-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+/* Settings Section */
+.settings-section {
+  background-color: var(--card-bg);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.settings-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.settings-row label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Range slider */
+input[type="range"] {
+  width: 300px;
+  margin: 0 1rem;
+}
+
+#quality-value {
+  font-weight: bold;
+  min-width: 40px;
+}
+
+/* Files Table */
+.files-section {
+  background-color: var(--card-bg);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.files-table-container {
+  overflow-x: auto;
+  margin-top: 1rem;
+}
+
+.files-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.files-table th,
+.files-table td {
+  border: 1px solid var(--border-color);
+  padding: 0.75rem;
+  text-align: left;
+}
+
+.files-table th {
+  background-color: rgba(66, 133, 244, 0.1);
+}
+
+.files-table tr:nth-child(even) {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+/* Progress Bar */
+.progress-section {
+  background-color: var(--card-bg);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.progress-bar-container {
+  background-color: #e0e0e0;
+  border-radius: 4px;
+  height: 20px;
+  margin: 1rem 0;
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  background-color: var(--primary-color);
+  width: 0;
+  transition: width 0.3s ease;
+}
+
+.progress-stats {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  color: var(--light-text);
+}
+
+/* Results Section */
+.results-section {
+  background-color: var(--card-bg);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.results-summary {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+
+.result-item {
+  flex: 1;
+  min-width: 120px;
+  padding: 1rem;
+  background-color: rgba(0, 0, 0, 0.03);
+  border-radius: 4px;
+  margin: 0.5rem;
+  text-align: center;
+}
+
+.result-label {
+  display: block;
+  font-size: 0.9rem;
+  color: var(--light-text);
+  margin-bottom: 0.5rem;
+}
+
+.result-value {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: var(--primary-color);
+}
+
+.converted-files-list {
+  margin-top: 1.5rem;
+}
+
+.download-section {
+  display: flex;
+  justify-content: center;
+  margin: 1.5rem 0;
+}
+
+/* Status indicators */
+.status-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.status-badge.converted {
+  background-color: rgba(52, 168, 83, 0.15);
+  color: var(--success-color);
+}
+
+.status-badge.skipped {
+  background-color: rgba(251, 188, 5, 0.15);
+  color: var(--warning-color);
+}
+
+.status-badge.failed {
+  background-color: rgba(234, 67, 53, 0.15);
+  color: var(--error-color);
+}
+
+.status-badge.pending {
+  background-color: rgba(66, 133, 244, 0.15);
+  color: var(--primary-color);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+  }
+  
+  h1 {
+    font-size: 2rem;
+  }
+  
+  h2 {
+    font-size: 1.5rem;
+  }
+  
+  .results-summary {
+    flex-direction: column;
+  }
+  
+  .result-item {
+    margin: 0.5rem 0;
+  }
+  
+  .settings-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  input[type="range"] {
+    width: 100%;
+    margin: 0.5rem 0;
+  }
+} 
